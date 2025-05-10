@@ -1,0 +1,35 @@
+services:
+  order-db:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - order-db-data:/data/db
+
+  inventory-db:
+    image: mongo:latest
+    ports:
+      - "27018:27017"
+    volumes:
+      - inventory-db-data:/data/db
+
+  notification-db:
+    image: mongo:latest
+    ports:
+      - "27019:27017"
+    volumes:
+      - notification-db-data:/data/db
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
+volumes:
+  order-db-data:
+  inventory-db-data:
+  notification-db-data:
+  rabbitmq-data:
