@@ -1,6 +1,7 @@
 import express, { json } from "express";
 import cors from "cors";
 import { config } from "dotenv";
+import { initRabbitMQListener } from "./rabbitmq";
 
 config();
 
@@ -19,6 +20,7 @@ app.get("/ping", (req, res) => {
   });
 });
 
+initRabbitMQListener();
 app.listen(port, () => {
   console.log(`Notification service listening on port ${port}`);
 });
