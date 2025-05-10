@@ -9,7 +9,7 @@ importers:
   .:
     dependencies:
       amqplib:
-        specifier: ^0.10.3
+        specifier: ^0.10.8
         version: 0.10.8
       cors:
         specifier: ^2.8.5

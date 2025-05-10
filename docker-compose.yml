@@ -1,22 +1,49 @@
 services:
   order-db:
-    image: mongo:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.mongo
+      args:
+        MONGO_VERSION: 6
+    environment:
+      MONGO_REPLICA_HOST: 127.0.0.1
+      MONGO_REPLICA_PORT: 27017
+      MONGO_COMMAND: "mongosh"
     ports:
       - "27017:27017"
+    restart: unless-stopped
     volumes:
       - order-db-data:/data/db
 
   inventory-db:
-    image: mongo:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.mongo
+      args:
+        MONGO_VERSION: 6
+    environment:
+      MONGO_REPLICA_HOST: 127.0.0.1
+      MONGO_REPLICA_PORT: 27017
+      MONGO_COMMAND: "mongosh"
+    restart: unless-stopped
     ports:
       - "27018:27017"
     volumes:
       - inventory-db-data:/data/db
 
   notification-db:
-    image: mongo:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.mongo
+      args:
+        MONGO_VERSION: 6
+    environment:
+      MONGO_REPLICA_HOST: 127.0.0.1
+      MONGO_REPLICA_PORT: 27017
+      MONGO_COMMAND: "mongosh"
     ports:
       - "27019:27017"
+    restart: unless-stopped
     volumes:
       - notification-db-data:/data/db
 
@@ -25,6 +52,9 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
 
