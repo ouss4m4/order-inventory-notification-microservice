@@ -1,11 +1,17 @@
 export const ORDER_CREATED = "order.created";
 
+interface OrderItem {
+  sku: string;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
 export interface OrderCreatedPayload {
-  orderId: string;
-  userId: string;
-  items: Array<{
-    productId: string;
-    quantity: number;
-  }>;
-  createdAt: string;
+  id: string;
+  items: OrderItem[];
+  total: number;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

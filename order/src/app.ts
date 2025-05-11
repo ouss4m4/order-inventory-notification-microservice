@@ -1,8 +1,12 @@
+import { ORDER_UPDATED } from "./../../shared/events/order-updated";
 import { ORDER_CREATED, OrderCreatedPayload } from "./../../shared/events/order-created";
 import express, { json, Request, Response } from "express";
 import cors from "cors";
 import { config } from "dotenv";
 import { RabbitMQProducer } from "./rabbitmq";
+import { parseCreateOrderDto, parseEditOrderDto } from "./typings";
+import { orderService } from "./lib/order.service";
+import { orderChangeEventBuilder } from "./helpers/orderChangeEventBuilder";
 
 config();
 
@@ -19,26 +23,61 @@ app.get("/ping", (req, res) => {
     service: "order-service",
     timestamp: new Date().toISOString(),
   });
-  RabbitMQProducer.publish("HealthCheck", "Hello Order Service");
 });
 
 // create order
-app.get("/order", async (req: Request, res: Response) => {
-  const { userId = 1, items = [] } = req.body;
+app.post("/order", async (req: Request, res: Response, next) => {
+  try {
+    const result = parseCreateOrderDto(req.body);
+    if (!result.success) {
+      return next(result.error);
+    }
 
-  const orderId = crypto.randomUUID(); // or DB-generated ID
-  const payload: OrderCreatedPayload = {
-    orderId,
-    userId,
-    items,
-    createdAt: new Date().toISOString(),
-  };
+    const order = await orderService.create(result.data);
+    await RabbitMQProducer.publish<OrderCreatedPayload>(ORDER_CREATED, order);
+    res.status(201).json(order);
+  } catch (error) {
+    next(error);
+  }
+});
 
-  // Save to DB here (prisma later)
+app.put("/order/:id", async (req: Request, res: Response, next) => {
+  try {
+    let id = req.params.id;
+    const result = parseEditOrderDto(req.body);
+    if (!result.success) {
+      return next(result.error);
+    }
+    const { previous, updated } = await orderService.edit(id, result.data);
 
-  // Emit the event
-  await RabbitMQProducer.publish(ORDER_CREATED, payload);
-  res.status(201).send();
+    await RabbitMQProducer.publish(ORDER_UPDATED, orderChangeEventBuilder(previous, updated));
+
+    res.status(200).json(updated);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.use((error: any, _: any, res: Response, next: Function) => {
+  if (res.headersSent) {
+    return next(error);
+  }
+
+  if (error && typeof error === "object" && "errors" in error) {
+    const formatted: Record<string, string> = {};
+    (error as any).errors?.forEach((err: any) => {
+      formatted[err.path?.join(".") || "unknown"] = err.message;
+    });
+    return res.status(400).json({ success: false, message: "missing fields", errors: formatted });
+  }
+
+  if (error instanceof Error) {
+    console.error(error.message);
+    return res.status(400).json({ success: false, message: error.message });
+  }
+
+  console.error(error);
+  return res.status(400).json({ success: false, message: "An Error Happened" });
 });
 
 const startServer = () => {

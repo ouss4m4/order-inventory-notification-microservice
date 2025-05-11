@@ -14,7 +14,7 @@ export async function initRabbitMQ(): Promise<void> {
 }
 
 export const RabbitMQProducer = {
-  async publish(queue: string, message: unknown) {
+  async publish<T>(queue: string, message: T) {
     if (!channel) throw new Error("RabbitMQ not initialized");
     await channel.assertQueue(queue, { durable: true });
     channel.sendToQueue(queue, Buffer.from(JSON.stringify(message)), {
