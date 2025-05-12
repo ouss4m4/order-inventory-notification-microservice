@@ -34,8 +34,6 @@ function orderChangeEventBuilder(previous: Order, update: Order) {
     };
     return paidEvent;
   }
-
-  throw new Error("No relevant changes detected for event generation");
 }
 
 export { orderChangeEventBuilder };

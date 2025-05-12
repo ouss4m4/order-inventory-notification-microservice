@@ -1,6 +1,6 @@
 import { config } from "dotenv";
-import { initRabbitMQListener } from "./rabbitmq";
 import { createServer } from "http";
+import { initRabbitMQListener } from "./rabbitmq";
 
 config();
 

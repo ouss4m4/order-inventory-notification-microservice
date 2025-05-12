@@ -50,7 +50,10 @@ app.put("/order/:id", async (req: Request, res: Response, next) => {
     }
     const { previous, updated } = await orderService.edit(id, result.data);
 
-    await RabbitMQProducer.publish(ORDER_UPDATED, orderChangeEventBuilder(previous, updated));
+    const changeEvent = orderChangeEventBuilder(previous, updated);
+    if (changeEvent) {
+      await RabbitMQProducer.publish(ORDER_UPDATED, changeEvent);
+    }
 
     res.status(200).json(updated);
   } catch (error) {
