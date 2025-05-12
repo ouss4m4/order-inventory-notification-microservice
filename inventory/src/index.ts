@@ -1,23 +1,33 @@
-import express, { json } from "express";
 import { config } from "dotenv";
-import cors from "cors";
+import { createServer } from "http";
+import { initListeners } from "./rabbitmq";
+
 config();
 
-const app = express();
-const port = process.env.PORT || new Error("ENV Port not setup");
+const port = process.env.PORT;
 
-app.use(cors());
-app.use(json());
+if (!port) {
+  throw new Error("PORT environment variable is not defined");
+}
 
-// Health check endpoint
-app.get("/ping", (req, res) => {
-  res.json({
-    status: "ok",
-    service: "invenotry-service",
-    timestamp: new Date().toISOString(),
-  });
+const server = createServer((req, res) => {
+  if (req.url === "/ping" && req.method === "GET") {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify({
+        status: "ok",
+        service: "inventory-service",
+        timestamp: new Date().toISOString(),
+      })
+    );
+  } else {
+    res.writeHead(404);
+    res.end();
+  }
 });
 
-app.listen(port, () => {
+initListeners();
+
+server.listen(port, () => {
   console.log(`Inventory service listening on port ${port}`);
 });
