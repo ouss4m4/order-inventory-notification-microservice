@@ -6,7 +6,7 @@ export function handleOrderUpdated(channel: Channel) {
     if (!msg) return;
     const data = JSON.parse(msg.content.toString());
     console.log(`📩 ${ORDER_UPDATED}: Received message `, data);
-    // sendNotification(data.id);
+    // manageInventory(data.id);
     channel.ack(msg);
   };
 }

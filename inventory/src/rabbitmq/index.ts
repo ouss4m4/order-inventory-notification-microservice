@@ -16,3 +16,19 @@ export async function initListeners() {
   channel.consume(ORDER_CREATED, handleOrderCreated(channel));
   channel.consume(ORDER_UPDATED, handleOrderUpdated(channel));
 }
+// json.parse() // listen . exit()
+
+// rate liming - ()
+// throtling  -
+// JEST
+// Playwright
+// CI/CD docker-compose
+// securty
+// node
+// data race
+// race conditions
+// how do you choose a db? (one solution)
+// ddd solid clean architrecture cqrs
+// microservices - grpc rest (http) ?? json. binary reduced size. grpc internal .
+// rabbitmq
+//
